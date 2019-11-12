@@ -35,7 +35,7 @@ fun main() {
     println(half < twoThirds)
 
 
-//    println(half in third..twoThirds)
+    println(half in third..twoThirds)
 //
 //    println(2000000000L divBy 4
 //

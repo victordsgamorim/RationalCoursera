@@ -3,7 +3,18 @@ package rationals
 data class Rational(
         val numerator: Int,
         val denominator: Int = 1,
-        val result: Float = 0.0f) {
+        val result: Float = 0.0f) : Comparable<Rational> {
+
+    override fun compareTo(other: Rational): Int {
+        val primaryNumeratorFloat = this.numerator.toFloat()
+        val primaryDenominatorFloat = this.denominator.toFloat()
+        val primaryFractionResult = primaryNumeratorFloat.div(primaryDenominatorFloat)
+
+        val secundaryNumeratorFloat = other.numerator.toFloat()
+        val secundaryDenominatorFloat = other.denominator.toFloat()
+        val secundaryFracitonResult = secundaryNumeratorFloat.div(secundaryDenominatorFloat)
+        return primaryFractionResult.compareTo(secundaryFracitonResult)
+    }
 
 
     private fun getDominatorMultiplication(other: Rational): Triple<Int, Int, Int> {
@@ -52,21 +63,10 @@ data class Rational(
 
     operator fun unaryMinus() = Rational(-this.numerator, this.denominator, -getFractionResult(this.numerator, this.denominator))
 
-    operator fun compareTo(other: Rational): Int {
-        val primaryNumeratorFloat = this.numerator.toFloat()
-        val primaryDenominatorFloat = this.denominator.toFloat()
-        val primaryFractionResult = primaryNumeratorFloat.div(primaryDenominatorFloat)
 
-        val secundaryNumeratorFloat = other.numerator.toFloat()
-        val secundaryDenominatorFloat = other.denominator.toFloat()
-        val secundaryFracitonResult = secundaryNumeratorFloat.div(secundaryDenominatorFloat)
-        return primaryFractionResult.compareTo(secundaryFracitonResult)
+    operator fun contains(range: ClosedRange<Rational>): Boolean {
+        return this in range
     }
-
-    operator fun contains(contain: Rational): Boolean {
-        return this in contain
-    }
-
 
     override fun toString(): String {
         if (denominator == 1) return "$numerator"
