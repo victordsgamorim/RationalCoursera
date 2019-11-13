@@ -1,9 +1,11 @@
 package rationals
 
+import java.math.BigInteger
+
 data class Rational(
-        val numerator: Int,
-        val denominator: Int = 1,
-        val result: Float = 0.0f) : Comparable<Rational> {
+        val numerator: BigInteger,
+        val denominator: BigInteger = BigInteger.valueOf(1)
+) : Comparable<Rational> {
 
     override fun compareTo(other: Rational): Int {
         val primaryNumeratorFloat = this.numerator.toFloat()
@@ -17,39 +19,47 @@ data class Rational(
     }
 
 
-    private fun getDominatorMultiplication(other: Rational): Triple<Int, Int, Int> {
+    private fun calcNumeratorAndDenominator(other: Rational): Triple<BigInteger, BigInteger, BigInteger> {
         val totalDenominator = this.denominator.times(other.denominator)
 
-        val newPrimaryNumerator = totalDenominator.div(this.denominator)
-        val newSecundaryNumerator = totalDenominator.div(other.denominator)
+        val newPrimaryNumerator = totalDenominator.div(this.denominator).times(this.numerator)
+        val newSecundaryNumerator = totalDenominator.div(other.denominator).times(other.numerator)
 
         return Triple(newPrimaryNumerator, newSecundaryNumerator, totalDenominator)
     }
 
     operator fun plus(other: Rational): Rational {
-        val (primaryNumerator, secundaryNumerator, denominator) = getDominatorMultiplication(other)
+        val (primaryNumerator, secundaryNumerator, denominator)
+                = calcNumeratorAndDenominator(other)
+
         val totalNumerator = primaryNumerator.plus(secundaryNumerator)
 
-        return Rational(numerator = totalNumerator,
-                denominator = denominator,
-                result = getFractionResult(totalNumerator, denominator))
+        val rational = Rational(numerator = totalNumerator,
+                denominator = denominator)
+
+        return factorFraction(rational)
     }
 
     operator fun minus(other: Rational): Rational {
-        val (primaryNumerator, secundaryNumerator, denominator) = getDominatorMultiplication(other)
+        val (primaryNumerator, secundaryNumerator, denominator)
+                = calcNumeratorAndDenominator(other)
         val totalNumerator = primaryNumerator.minus(secundaryNumerator)
 
-        return Rational(numerator = totalNumerator,
-                denominator = denominator,
-                result = getFractionResult(totalNumerator, denominator))
+        val rational = Rational(numerator = totalNumerator,
+                denominator = denominator)
+
+        return factorFraction(rational)
     }
 
     operator fun times(other: Rational): Rational {
         val totalDenominator = this.denominator.times(other.denominator)
         val numerator = this.numerator.times(other.numerator)
-        return Rational(numerator = numerator,
-                denominator = totalDenominator,
-                result = getFractionResult(numerator, totalDenominator))
+
+        val rational = Rational(numerator = numerator,
+                denominator = totalDenominator)
+
+
+        return factorFraction(rational)
     }
 
     operator fun div(other: Rational): Rational {
@@ -57,11 +67,14 @@ data class Rational(
         val numerator = this.numerator.times(other.denominator)
 
         return Rational(numerator = numerator,
-                denominator = denominator,
-                result = getFractionResult(numerator, denominator))
+                denominator = denominator)
     }
 
-    operator fun unaryMinus() = Rational(-this.numerator, this.denominator, -getFractionResult(this.numerator, this.denominator))
+
+    operator fun unaryMinus() = Rational(this.numerator.negate(), this.denominator)
+
+
+    operator fun unaryPlus() = Rational(this.numerator, this.denominator)
 
 
     operator fun contains(range: ClosedRange<Rational>): Boolean {
@@ -69,7 +82,7 @@ data class Rational(
     }
 
     override fun toString(): String {
-        if (denominator == 1) return "$numerator"
+        if (denominator == BigInteger.ONE) return "$numerator"
         return "$numerator/$denominator"
     }
 
